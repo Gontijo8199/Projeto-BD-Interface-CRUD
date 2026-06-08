@@ -1,5 +1,10 @@
 # Spotify BD CRUD
 
+## Alunos
+- Nina Leão Fonseca
+- Rafael Gontijo Ferreira
+- Rudá Dantas Ruoso Brandão
+
 ## Como Executar o Projeto
 
 1. Abra o projeto diretamente no GitHub Codespaces (o ambiente e o banco de dados serão configurados de forma automática).
@@ -23,7 +28,7 @@ EXPLAIN ANALYZE SELECT * FROM Musica WHERE nome_musica = 'Nome da Faixa';
 ```
 
 
-## Estrutura Relacionala
+## Estrutura Relacional
 
 | Tabela | Chave Primária (PK) | Chaves Estrangeiras (FK) | Operações |
 | --- | --- | --- | --- |

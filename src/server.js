@@ -25,6 +25,10 @@ const executarSQL = async (res, query, params = []) => {
 };
 
 app.get('/api/usuarios', (req, res) => executarSQL(res, 'SELECT * FROM Usuario ORDER BY id_usuario;'));
+app.get('/api/usuarios/busca', (req, res) => {
+  const termo = req.query.nome || '';
+  executarSQL(res, 'SELECT * FROM Usuario WHERE nome ILIKE $1 ORDER BY id_usuario;', [`%${termo}%`]);
+});
 app.post('/api/usuarios', (req, res) => {
   const { id_usuario, nome, email, telefone, tipo } = req.body;
   executarSQL(res, 'INSERT INTO Usuario (id_usuario, nome, email, telefone, tipo) VALUES ($1, $2, $3, $4, $5) RETURNING *;', [id_usuario, nome, email, telefone, tipo]);
