@@ -1,17 +1,24 @@
 {
-  "name": "My Codespace",
+  "name": "PostgreSQL Codespace",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  
   "features": {
     "ghcr.io/devcontainers/features/postgres:1": {
-      "version": "latest"
+      "version": "latest",
+      "databaseName": "development_db", // O Postgres da feature cria esse por padrão
+      "postgresUser": "postgres",
+      "postgresPassword": "password123"
     }
   },
+  "forwardPorts": [5432],
   "customizations": {
     "vscode": {
       "extensions": [
-        "mtxr.sqltools",
-        "mtxr.sqltools-driver-pg"
+        "ms-ossdata.vscode-pgsql"
       ]
     }
   },
-  "remoteUser": "vscode"
+  
+  // O Codespaces vai rodar seu script assim que terminar de montar o ambiente
+  "postCreateCommand": "bash scripts/setup-db.sh"
 }
