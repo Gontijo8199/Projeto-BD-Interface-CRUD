@@ -1,43 +1,77 @@
 const express = require('express');
+const { Pool } = require('pg');
 const path = require('path');
-const { handleQuery } = require('./database');
 
 const app = express();
 app.use(express.json());
+
 app.use(express.static(path.join(__dirname, '../public')));
 
-// ROTAS DE USUÁRIOS
-app.get('/api/usuarios', handleQuery('SELECT * FROM Usuario ORDER BY id_usuario ASC;'));
-app.post('/api/usuarios', handleQuery(
-  `INSERT INTO Usuario (id_usuario, nome, email, tipo, telefone, foto_perfil) VALUES ($1, $2, $3, $4, $5, 'default.png') RETURNING *;`,
-  req => [req.body.id_usuario, req.body.nome, req.body.email, req.body.tipo, req.body.telefone]
-));
-app.delete('/api/usuarios/:id', handleQuery('DELETE FROM Usuario WHERE id_usuario = $1;', req => [req.params.id]));
+const pool = new Pool({
+  user: 'spotifyuser',
+  host: 'localhost',
+  database: 'Spotify',
+  password: 'spotifypass',
+  port: 5432,
+});
 
-// ROTAS DE ÁLBUNS
-app.get('/api/albuns', handleQuery('SELECT * FROM Album ORDER BY id_album ASC;'));
-app.post('/api/albuns', handleQuery(
-  `INSERT INTO Album (id_album, nome_album, capa, tipo_album, data_lancamento) VALUES ($1, $2, 'capa.png', $3, $4) RETURNING *;`,
-  req => [req.body.id_album, req.body.nome_album, req.body.tipo_album, req.body.data_lancamento]
-));
-app.delete('/api/albuns/:id', handleQuery('DELETE FROM Album WHERE id_album = $1;', req => [req.params.id]));
+const executarSQL = async (res, query, params = []) => {
+  try {
+    const resultado = await pool.query(query, params);
+    res.json(resultado.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-// MÚSICAS
-app.get('/api/musicas', handleQuery('SELECT * FROM Musica ORDER BY id_musica ASC;'));
-app.get('/api/musicas/busca', handleQuery('SELECT * FROM Musica WHERE nome_musica = $1;', req => [req.query.nome]));
-app.post('/api/musicas', handleQuery(
-  `INSERT INTO Musica (id_musica, nome_musica, faixa_audio_url, eh_explicita, registro_tom, duracao, id_album) VALUES ($1, $2, $3, FALSE, 'C', $4, $5) RETURNING *;`,
-  req => [req.body.id_musica, req.body.nome_musica, req.body.faixa_audio_url, req.body.duracao, req.body.id_album]
-));
-app.delete('/api/musicas/:id', handleQuery('DELETE FROM Musica WHERE id_musica = $1;', req => [req.params.id]));
+app.get('/api/usuarios', (req, res) => executarSQL(res, 'SELECT * FROM Usuario ORDER BY id_usuario;'));
+app.post('/api/usuarios', (req, res) => {
+  const { id_usuario, nome, email, telefone, tipo } = req.body;
+  executarSQL(res, 'INSERT INTO Usuario (id_usuario, nome, email, telefone, tipo) VALUES ($1, $2, $3, $4, $5) RETURNING *;', [id_usuario, nome, email, telefone, tipo]);
+});
+app.put('/api/usuarios/:id', (req, res) => {
+  const { nome, email, telefone, tipo } = req.body;
+  executarSQL(res, 'UPDATE Usuario SET nome=$1, email=$2, telefone=$3, tipo=$4 WHERE id_usuario=$5 RETURNING *;', [nome, email, telefone, tipo, req.params.id]);
+});
+app.delete('/api/usuarios/:id', (req, res) => executarSQL(res, 'DELETE FROM Usuario WHERE id_usuario=$1 RETURNING *;', [req.params.id]));
 
-// PLAYLISTS
-app.get('/api/playlists', handleQuery('SELECT * FROM Playlist ORDER BY id_playlist ASC;'));
-app.post('/api/playlists', handleQuery(
-  `INSERT INTO Playlist (id_playlist, nome_playlist, descricao, eh_privada, capa_playlist, id_criador) VALUES ($1, $2, $3, FALSE, 'playlist.png', $4) RETURNING *;`,
-  req => [req.body.id_playlist, req.body.nome_playlist, req.body.descricao, req.body.id_criador]
-));
-app.delete('/api/playlists/:id', handleQuery('DELETE FROM Playlist WHERE id_playlist = $1;', req => [req.params.id]));
+app.get('/api/albuns', (req, res) => executarSQL(res, 'SELECT * FROM Album ORDER BY id_album;'));
+app.get('/api/albuns/busca', (req, res) => executarSQL(res, 'SELECT * FROM Album WHERE nome_album ILIKE $1;', [`%${req.query.nome}%`]));
+app.post('/api/albuns', (req, res) => {
+  const { id_album, nome_album, tipo_album, data_lancamento } = req.body;
+  executarSQL(res, 'INSERT INTO Album (id_album, nome_album, tipo_album, data_lancamento) VALUES ($1, $2, $3, $4) RETURNING *;', [id_album, nome_album, tipo_album, data_lancamento]);
+});
+app.put('/api/albuns/:id', (req, res) => {
+  const { nome_album, tipo_album, data_lancamento } = req.body;
+  executarSQL(res, 'UPDATE Album SET nome_album=$1, tipo_album=$2, data_lancamento=$3 WHERE id_album=$4 RETURNING *;', [nome_album, tipo_album, data_lancamento, req.params.id]);
+});
+app.delete('/api/albuns/:id', (req, res) => executarSQL(res, 'DELETE FROM Album WHERE id_album=$1 RETURNING *;', [req.params.id]));
+
+app.get('/api/musicas', (req, res) => executarSQL(res, 'SELECT * FROM Musica ORDER BY id_musica;'));
+app.get('/api/musicas/busca', (req, res) => executarSQL(res, 'SELECT * FROM Musica WHERE nome_musica = $1;', [req.query.nome]));
+app.post('/api/musicas', (req, res) => {
+  const { id_musica, nome_musica, faixa_audio_url, duracao, id_album } = req.body;
+  executarSQL(res, 'INSERT INTO Musica (id_musica, nome_musica, faixa_audio_url, duracao, id_album) VALUES ($1, $2, $3, $4, $5) RETURNING *;', [id_musica, nome_musica, faixa_audio_url, duracao, id_album]);
+});
+app.put('/api/musicas/:id', (req, res) => {
+  const { nome_musica, faixa_audio_url, duracao, id_album } = req.body;
+  executarSQL(res, 'UPDATE Musica SET nome_musica=$1, faixa_audio_url=$2, duracao=$3, id_album=$4 WHERE id_musica=$5 RETURNING *;', [nome_musica, faixa_audio_url, duracao, id_album, req.params.id]);
+});
+app.delete('/api/musicas/:id', (req, res) => executarSQL(res, 'DELETE FROM Musica WHERE id_musica=$1 RETURNING *;', [req.params.id]));
+
+app.get('/api/playlists', (req, res) => executarSQL(res, 'SELECT * FROM Playlist ORDER BY id_playlist;'));
+app.get('/api/playlists/busca', (req, res) => executarSQL(res, 'SELECT * FROM Playlist WHERE nome_playlist ILIKE $1;', [`%${req.query.nome}%`]));
+app.post('/api/playlists', (req, res) => {
+  const { id_playlist, nome_playlist, descricao, id_criador } = req.body;
+  executarSQL(res, 'INSERT INTO Playlist (id_playlist, nome_playlist, descricao, id_criador) VALUES ($1, $2, $3, $4) RETURNING *;', [id_playlist, nome_playlist, descricao, id_criador]);
+});
+app.put('/api/playlists/:id', (req, res) => {
+  const { nome_playlist, descricao, id_criador } = req.body;
+  executarSQL(res, 'UPDATE Playlist SET nome_playlist=$1, descricao=$2, id_criador=$3 WHERE id_playlist=$4 RETURNING *;', [nome_playlist, descricao, id_criador, req.params.id]);
+});
+app.delete('/api/playlists/:id', (req, res) => executarSQL(res, 'DELETE FROM Playlist WHERE id_playlist=$1 RETURNING *;', [req.params.id]));
 
 const PORT = 3000;
-app.listen(PORT, '0.0.0.0', () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Servidor rodando com sucesso na porta ${PORT}`);
+});

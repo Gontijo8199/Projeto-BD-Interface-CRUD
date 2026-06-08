@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spotify Dashboard - Relacional</title>
+  <title>Spotify Dashboard - CRUD</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>Spotify BD - Painel Total</h1>
+  <h1>Spotify BD - Painel de Controle</h1>
   
   <div class="nav-tabs">
     <button id="tabUser" class="active" onclick="mudarAba('user')">1. Usuários</button>
@@ -18,51 +18,81 @@
   </div>
 
   <div id="secUser" class="secao active">
-    <h2>[CRUD] Cadastrar Usuário</h2>
+    <h2>Cadastrar / Editar Usuário</h2>
     <input type="number" id="userId" placeholder="ID do Usuário">
     <input type="text" id="userNome" placeholder="Nome">
     <input type="email" id="userEmail" placeholder="E-mail">
     <input type="text" id="userTelefone" placeholder="Telefone">
     <select id="userTipo"><option value="Ouvinte">Ouvinte</option><option value="Artista">Artista</option></select>
-    <button onclick="salvar('usuarios', ['userId', 'userNome', 'userEmail', 'userTelefone', 'userTipo'], carregarUsuarios)">Cadastrar</button>
-    <hr><h2>Usuários Cadastrados</h2><ul id="listaUsuarios"></ul>
+    <button id="btnUser" onclick="salvar('usuarios', ['userId', 'userNome', 'userEmail', 'userTelefone', 'userTipo'], carregarUsuarios)">Salvar Usuário</button>
+    
+    <hr>
+    <h2>Usuários Cadastrados</h2>
+    <ul id="listaUsuarios"></ul>
   </div>
 
   <div id="secAlbum" class="secao">
-    <h2>[CRUD] Cadastrar Álbum</h2>
+    <h2>Buscar Álbum</h2>
+    <div style="display: flex; gap: 5px;">
+      <input type="text" id="buscaAlbum" placeholder="Nome do álbum...">
+      <button onclick="buscarAlbum()">Buscar</button>
+      <button onclick="carregarAlbuns()" style="background-color: #555;">Ver Todos</button>
+    </div>
+
+    <hr>
+    <h2>Cadastrar / Editar Álbum</h2>
     <input type="number" id="albumId" placeholder="ID do Álbum">
     <input type="text" id="albumNome" placeholder="Nome do Álbum">
     <input type="text" id="albumTipo" placeholder="Tipo (Ex: Álbum, Single)">
-    <input type="number" id="albumAno" placeholder="Ano de Lançamento (Ex: 2026)">
-    <button onclick="salvar('albuns', ['albumId', 'albumNome', 'albumTipo', 'albumAno'], carregarAlbuns)">Cadastrar Álbum</button>
-    <hr><h2>Álbuns no Sistema</h2><ul id="listaAlbuns"></ul>
+    <input type="number" id="albumAno" placeholder="Ano de Lançamento">
+    <button id="btnAlbum" onclick="salvar('albuns', ['albumId', 'albumNome', 'albumTipo', 'albumAno'], carregarAlbuns)">Salvar Álbum</button>
+    
+    <hr>
+    <h2>Álbuns no Sistema</h2>
+    <ul id="listaAlbuns"></ul>
   </div>
 
   <div id="secMusica" class="secao">
-    <h2>[Caso de Uso] Buscar por Nome Exato</h2>
-    <input type="text" id="buscaNome" placeholder="Digite o nome exato da música...">
-    <button onclick="buscarMusica()">Buscar via Índice</button>
+    <h2>Buscar Música (Índice)</h2>
+    <div style="display: flex; gap: 5px;">
+      <input type="text" id="buscaNome" placeholder="Nome exato da música...">
+      <button onclick="buscarMusica()">Buscar via Índice</button>
+      <button onclick="carregarMusicas()" style="background-color: #555;">Ver Todos</button>
+    </div>
+
     <hr>
-    <h2>[CRUD] Cadastrar Música</h2>
-    <span class="info-fk">Requer ID de Álbum Existente</span>
+    <h2>Cadastrar / Editar Música</h2>
     <input type="number" id="musicaId" placeholder="ID da Música">
     <input type="text" id="musicaNome" placeholder="Nome da Música">
     <input type="text" id="musicaUrl" placeholder="URL da faixa (.mp3)">
     <input type="number" id="musicaDuracao" placeholder="Duração (segundos)">
-    <input type="number" id="musicaAlbumId" placeholder="ID do Álbum (Chave Estrangeira)">
-    <button onclick="salvar('musicas', ['musicaId', 'musicaNome', 'musicaUrl', 'musicaDuracao', 'musicaAlbumId'], carregarMusicas)">Cadastrar Música</button>
-    <hr><h2>Catálogo de Músicas</h2><ul id="listaMusicas"></ul>
+    <select id="musicaAlbumId"></select>
+    <button id="btnMusica" onclick="salvar('musicas', ['musicaId', 'musicaNome', 'musicaUrl', 'musicaDuracao', 'musicaAlbumId'], carregarMusicas)">Salvar Música</button>
+    
+    <hr>
+    <h2>Catálogo de Músicas</h2>
+    <ul id="listaMusicas"></ul>
   </div>
 
   <div id="secPlay" class="secao">
-    <h2>[CRUD] Cadastrar Playlist</h2>
-    <span class="info-fk">Requer ID de Usuário Existente</span>
+    <h2>Buscar Playlist</h2>
+    <div style="display: flex; gap: 5px;">
+      <input type="text" id="buscaPlay" placeholder="Nome da playlist...">
+      <button onclick="buscarPlaylist()">Buscar</button>
+      <button onclick="carregarPlaylists()" style="background-color: #555;">Ver Todos</button>
+    </div>
+
+    <hr>
+    <h2>Cadastrar / Editar Playlist</h2>
     <input type="number" id="playId" placeholder="ID da Playlist">
     <input type="text" id="playNome" placeholder="Nome da Playlist">
     <input type="text" id="playDesc" placeholder="Descrição">
-    <input type="number" id="playCriadorId" placeholder="ID do Usuário Criador (Chave Estrangeira)">
-    <button onclick="salvar('playlists', ['playId', 'playNome', 'playDesc', 'playCriadorId'], carregarPlaylists)">Criar Playlist</button>
-    <hr><h2>Playlists Criadas</h2><ul id="listaPlaylists"></ul>
+    <select id="playCriadorId"></select>
+    <button id="btnPlay" onclick="salvar('playlists', ['playId', 'playNome', 'playDesc', 'playCriadorId'], carregarPlaylists)">Salvar Playlist</button>
+    
+    <hr>
+    <h2>Playlists Criadas</h2>
+    <ul id="listaPlaylists"></ul>
   </div>
 
   <script src="app.js"></script>
