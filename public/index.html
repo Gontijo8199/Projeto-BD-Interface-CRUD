@@ -2,7 +2,53 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spotify CRUD Simplificado</title>
+  <style>
+    /* Estilos mínimos apenas para organizar as seções de forma responsiva */
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 15px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #1DB954;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1ed760;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid #ccc;
+      margin: 20px 0;
+    }
+    li {
+      background: #fff;
+      padding: 10px;
+      margin-bottom: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .btn-acao {
+      width: auto;
+      padding: 5px 10px;
+      margin-left: 5px;
+      background-color: #333;
+    }
+  </style>
 </head>
 <body>
 
@@ -12,21 +58,20 @@
   <h2>[Caso de Uso: Ouvinte] Buscar Música</h2>
   <input type="text" id="buscaTitulo" placeholder="Digite o título exato...">
   <button onclick="buscarMusica()">Buscar</button>
-  <button onclick="carregarMusicas()">Ver Todas</button>
+  <button onclick="carregarMusicas()" style="background-color: #333;">Ver Todas</button>
 
   <hr>
 
   <h2>[Caso de Uso: Admin] Adicionar / Editar Música</h2>
-  <input type="number" id="musicaId" placeholder="ID (Apenas para Editar)">
+  <input type="number" id="musicaId" placeholder="ID (Apenas para Editar)" readonly style="background-color: #eee;">
   <input type="text" id="musicaTitulo" placeholder="Título da Música">
   <input type="number" id="musicaDuracao" placeholder="Duração (segundos)">
-  <br><br>
   <button onclick="salvarMusica()">Salvar (Cadastrar ou Atualizar)</button>
 
   <hr>
 
   <h2>Catálogo de Músicas</h2>
-  <ul id="listaMusicas"></ul>
+  <ul id="listaMusicas" style="padding: 0; list-style: none;"></ul>
 
   <script>
     const API_URL = '/api/musicas';
@@ -40,10 +85,12 @@
       musicas.forEach(m => {
         lista.innerHTML += `
           <li>
-            <b>ID:</b> ${m.id} | <b>${m.titulo}</b> (${m.duracao}s)
-            <button onclick="preencherCampos(${m.id}, '${m.titulo}', ${m.duracao})">Editar</button>
-            <button onclick="deletarMusica(${m.id})">Excluir</button>
-          </li><br>`;
+            <div><b>ID:</b> ${m.id} | <b>${m.titulo}</b> (${m.duracao}s)</div>
+            <div style="margin-top: 5px;">
+              <button class="btn-acao" onclick="preencherCampos(${m.id}, '${m.titulo}', ${m.duracao})">Editar</button>
+              <button class="btn-acao" style="background-color: #e74c3c;" onclick="deletarMusica(${m.id})">Excluir</button>
+            </div>
+          </li>`;
       });
     }
 
@@ -60,14 +107,25 @@
       }
       
       musicas.forEach(m => {
-        lista.innerHTML += `<li><b>Encontrada no Índice:</b> ID: ${m.id} - ${m.titulo} (${m.duracao}s)</li>`;
+        lista.innerHTML += `
+          <li>
+            <b>Encontrada no Índice:</b> ID: ${m.id} - ${m.titulo} (${m.duracao}s)
+            <br>
+            <button class="btn-acao" onclick="carregarMusicas()" style="margin-top:5px;">Voltar à Lista</button>
+          </li>`;
       });
     }
 
+    // CADASTRAR OU ATUALIZAR (CREATE / UPDATE)
     async function salvarMusica() {
       const id = document.getElementById('musicaId').value;
       const titulo = document.getElementById('musicaTitulo').value;
       const duracao = document.getElementById('musicaDuracao').value;
+
+      if (!titulo || !duracao) {
+        alert('Por favor, preencha o título e a duração!');
+        return;
+      }
 
       const dados = { titulo, duracao };
 
@@ -100,6 +158,7 @@
       document.getElementById('musicaId').value = id;
       document.getElementById('musicaTitulo').value = titulo;
       document.getElementById('musicaDuracao').value = duracao;
+      window.scrollTo(0, 0);
     }
 
     function limparCampos() {

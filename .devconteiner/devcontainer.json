@@ -1,8 +1,7 @@
 {
-  "name": "PostgreSQL Codespace",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-  // extnensão não estava funcionando :(
-  "forwardPorts": [5432],
+  "name": "PostgreSQL & Node.js Codespace",
+  "image": "mcr.microsoft.com/devcontainers/universal",
+  "forwardPorts": [5432, 3000],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -10,6 +9,6 @@
       ]
     }
   },
-  
-  "postCreateCommand": "bash scripts/setup-db.sh"
+  // inicializa
+  "postCreateCommand": "bash scripts/setup_db.sh && npm install"
 }
