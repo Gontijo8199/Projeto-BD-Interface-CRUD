@@ -1,20 +1,33 @@
 #!/bin/bash
 set -e
 
-sudo apt-get update -qq && sudo apt-get install -y -qq postgresql postgresql-client
+# root execution
+if [ "$EUID" -ne 0 ]; then
+  exec sudo bash "$0" "$@"
+fi
 
-sudo service postgresql start
+WORKSPACE_DIR=$(pwd)
 
-until sudo -u postgres pg_isready -q; do
+apt-get update -qq && apt-get install -y -qq postgresql postgresql-client
+
+pg_ctlcluster 16 main start 2>/dev/null || service postgresql start
+
+until su - postgres -c "pg_isready -q"; do
   sleep 1
 done
+
+# safe copy
+cp "$WORKSPACE_DIR/scripts/DDL-create-tables-Spotify.sql" /tmp/
+cp "$WORKSPACE_DIR/scripts/DML-insert-Spotify.sql" /tmp/
+chown postgres:postgres /tmp/*.sql
 
 sudo -u postgres psql -c "DROP DATABASE IF EXISTS \"Spotify\";"
 sudo -u postgres psql -c "CREATE DATABASE \"Spotify\";"
 
-sudo -u postgres psql -d "Spotify" -f scripts/DDL-create-tables-Spotify.sql
+sudo -u postgres psql -d "Spotify" -f "/tmp/DDL-create-tables-Spotify.sql"
 
-sudo -u postgres psql -d "Spotify" -f scripts/DML-insert-Spotify.sql
+sudo -u postgres psql -d "Spotify" -f "/tmp/DML-insert-Spotify.sql"
+
 
 sudo -u postgres psql -c "
   DO \$\$
@@ -31,3 +44,7 @@ sudo -u postgres psql -d "Spotify" -c "
   GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO spotifyuser;
   GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO spotifyuser;
 "
+
+rm -f /tmp/DDL-create-tables-Spotify.sql /tmp/DML-insert-Spotify.sql
+
+echo "Setup completo"

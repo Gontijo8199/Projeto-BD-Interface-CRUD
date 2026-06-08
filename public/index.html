@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Spotify CRUD Simplificado</title>
+</head>
+<body>
+
+  <h1>Spotify CRUD - Painel</h1>
+  <hr>
+
+  <h2>[Caso de Uso: Ouvinte] Buscar Música</h2>
+  <input type="text" id="buscaTitulo" placeholder="Digite o título exato...">
+  <button onclick="buscarMusica()">Buscar</button>
+  <button onclick="carregarMusicas()">Ver Todas</button>
+
+  <hr>
+
+  <h2>[Caso de Uso: Admin] Adicionar / Editar Música</h2>
+  <input type="number" id="musicaId" placeholder="ID (Apenas para Editar)">
+  <input type="text" id="musicaTitulo" placeholder="Título da Música">
+  <input type="number" id="musicaDuracao" placeholder="Duração (segundos)">
+  <br><br>
+  <button onclick="salvarMusica()">Salvar (Cadastrar ou Atualizar)</button>
+
+  <hr>
+
+  <h2>Catálogo de Músicas</h2>
+  <ul id="listaMusicas"></ul>
+
+  <script>
+    const API_URL = '/api/musicas';
+
+    async function carregarMusicas() {
+      const res = await fetch(API_URL);
+      const musicas = await res.json();
+      const lista = document.getElementById('listaMusicas');
+      lista.innerHTML = '';
+      
+      musicas.forEach(m => {
+        lista.innerHTML += `
+          <li>
+            <b>ID:</b> ${m.id} | <b>${m.titulo}</b> (${m.duracao}s)
+            <button onclick="preencherCampos(${m.id}, '${m.titulo}', ${m.duracao})">Editar</button>
+            <button onclick="deletarMusica(${m.id})">Excluir</button>
+          </li><br>`;
+      });
+    }
+
+    async function buscarMusica() {
+      const titulo = document.getElementById('buscaTitulo').value;
+      const res = await fetch(`${API_URL}/busca?titulo=${titulo}`);
+      const musicas = await res.json();
+      const lista = document.getElementById('listaMusicas');
+      lista.innerHTML = '';
+      
+      if (musicas.length === 0) {
+        lista.innerHTML = '<li>Nenhuma música encontrada.</li>';
+        return;
+      }
+      
+      musicas.forEach(m => {
+        lista.innerHTML += `<li><b>Encontrada no Índice:</b> ID: ${m.id} - ${m.titulo} (${m.duracao}s)</li>`;
+      });
+    }
+
+    async function salvarMusica() {
+      const id = document.getElementById('musicaId').value;
+      const titulo = document.getElementById('musicaTitulo').value;
+      const duracao = document.getElementById('musicaDuracao').value;
+
+      const dados = { titulo, duracao };
+
+      if (id) {
+        await fetch(`${API_URL}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
+      } else {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
+      }
+
+      limparCampos();
+      carregarMusicas();
+    }
+
+    async function deletarMusica(id) {
+      if (confirm('Tem certeza que deseja excluir?')) {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        carregarMusicas();
+      }
+    }
+
+    function preencherCampos(id, titulo, duracao) {
+      document.getElementById('musicaId').value = id;
+      document.getElementById('musicaTitulo').value = titulo;
+      document.getElementById('musicaDuracao').value = duracao;
+    }
+
+    function limparCampos() {
+      document.getElementById('musicaId').value = '';
+      document.getElementById('musicaTitulo').value = '';
+      document.getElementById('musicaDuracao').value = '';
+    }
+
+    carregarMusicas();
+  </script>
+</body>
+</html>
