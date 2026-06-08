@@ -1,0 +1,26 @@
+{
+  "name": "Spotify CRUD Container",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bullseye",
+  
+  "postCreateCommand": "npm install && chmod +x ./scripts/setup_db.sh && ./scripts/setup_db.sh",
+
+  "postStartCommand": "npm start",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg"
+      ]
+    }
+  },
+
+  "forwardPorts": [3000, 5432],
+  "portsAttributes": {
+    "3000": {
+      "label": "Servidor Node",
+      "visibility": "public"
+    }
+  }
+}

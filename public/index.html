@@ -3,171 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spotify CRUD Simplificado</title>
-  <style>
-    /* Estilos mínimos apenas para organizar as seções de forma responsiva */
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 15px;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #1DB954;
-      color: white;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #1ed760;
-    }
-    hr {
-      border: 0;
-      border-top: 1px solid #ccc;
-      margin: 20px 0;
-    }
-    li {
-      background: #fff;
-      padding: 10px;
-      margin-bottom: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    .btn-acao {
-      width: auto;
-      padding: 5px 10px;
-      margin-left: 5px;
-      background-color: #333;
-    }
-  </style>
+  <title>Spotify Dashboard - Relacional</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>Spotify CRUD - Painel</h1>
-  <hr>
+  <h1>Spotify BD - Painel Total</h1>
+  
+  <div class="nav-tabs">
+    <button id="tabUser" class="active" onclick="mudarAba('user')">1. Usuários</button>
+    <button id="tabAlbum" onclick="mudarAba('album')">2. Álbuns</button>
+    <button id="tabMusica" onclick="mudarAba('musica')">3. Músicas</button>
+    <button id="tabPlay" onclick="mudarAba('play')">4. Playlists</button>
+  </div>
 
-  <h2>[Caso de Uso: Ouvinte] Buscar Música</h2>
-  <input type="text" id="buscaTitulo" placeholder="Digite o título exato...">
-  <button onclick="buscarMusica()">Buscar</button>
-  <button onclick="carregarMusicas()" style="background-color: #333;">Ver Todas</button>
+  <div id="secUser" class="secao active">
+    <h2>[CRUD] Cadastrar Usuário</h2>
+    <input type="number" id="userId" placeholder="ID do Usuário">
+    <input type="text" id="userNome" placeholder="Nome">
+    <input type="email" id="userEmail" placeholder="E-mail">
+    <input type="text" id="userTelefone" placeholder="Telefone">
+    <select id="userTipo"><option value="Ouvinte">Ouvinte</option><option value="Artista">Artista</option></select>
+    <button onclick="salvar('usuarios', ['userId', 'userNome', 'userEmail', 'userTelefone', 'userTipo'], carregarUsuarios)">Cadastrar</button>
+    <hr><h2>Usuários Cadastrados</h2><ul id="listaUsuarios"></ul>
+  </div>
 
-  <hr>
+  <div id="secAlbum" class="secao">
+    <h2>[CRUD] Cadastrar Álbum</h2>
+    <input type="number" id="albumId" placeholder="ID do Álbum">
+    <input type="text" id="albumNome" placeholder="Nome do Álbum">
+    <input type="text" id="albumTipo" placeholder="Tipo (Ex: Álbum, Single)">
+    <input type="number" id="albumAno" placeholder="Ano de Lançamento (Ex: 2026)">
+    <button onclick="salvar('albuns', ['albumId', 'albumNome', 'albumTipo', 'albumAno'], carregarAlbuns)">Cadastrar Álbum</button>
+    <hr><h2>Álbuns no Sistema</h2><ul id="listaAlbuns"></ul>
+  </div>
 
-  <h2>[Caso de Uso: Admin] Adicionar / Editar Música</h2>
-  <input type="number" id="musicaId" placeholder="ID (Apenas para Editar)" readonly style="background-color: #eee;">
-  <input type="text" id="musicaTitulo" placeholder="Título da Música">
-  <input type="number" id="musicaDuracao" placeholder="Duração (segundos)">
-  <button onclick="salvarMusica()">Salvar (Cadastrar ou Atualizar)</button>
+  <div id="secMusica" class="secao">
+    <h2>[Caso de Uso] Buscar por Nome Exato</h2>
+    <input type="text" id="buscaNome" placeholder="Digite o nome exato da música...">
+    <button onclick="buscarMusica()">Buscar via Índice</button>
+    <hr>
+    <h2>[CRUD] Cadastrar Música</h2>
+    <span class="info-fk">Requer ID de Álbum Existente</span>
+    <input type="number" id="musicaId" placeholder="ID da Música">
+    <input type="text" id="musicaNome" placeholder="Nome da Música">
+    <input type="text" id="musicaUrl" placeholder="URL da faixa (.mp3)">
+    <input type="number" id="musicaDuracao" placeholder="Duração (segundos)">
+    <input type="number" id="musicaAlbumId" placeholder="ID do Álbum (Chave Estrangeira)">
+    <button onclick="salvar('musicas', ['musicaId', 'musicaNome', 'musicaUrl', 'musicaDuracao', 'musicaAlbumId'], carregarMusicas)">Cadastrar Música</button>
+    <hr><h2>Catálogo de Músicas</h2><ul id="listaMusicas"></ul>
+  </div>
 
-  <hr>
+  <div id="secPlay" class="secao">
+    <h2>[CRUD] Cadastrar Playlist</h2>
+    <span class="info-fk">Requer ID de Usuário Existente</span>
+    <input type="number" id="playId" placeholder="ID da Playlist">
+    <input type="text" id="playNome" placeholder="Nome da Playlist">
+    <input type="text" id="playDesc" placeholder="Descrição">
+    <input type="number" id="playCriadorId" placeholder="ID do Usuário Criador (Chave Estrangeira)">
+    <button onclick="salvar('playlists', ['playId', 'playNome', 'playDesc', 'playCriadorId'], carregarPlaylists)">Criar Playlist</button>
+    <hr><h2>Playlists Criadas</h2><ul id="listaPlaylists"></ul>
+  </div>
 
-  <h2>Catálogo de Músicas</h2>
-  <ul id="listaMusicas" style="padding: 0; list-style: none;"></ul>
-
-  <script>
-    const API_URL = '/api/musicas';
-
-    async function carregarMusicas() {
-      const res = await fetch(API_URL);
-      const musicas = await res.json();
-      const lista = document.getElementById('listaMusicas');
-      lista.innerHTML = '';
-      
-      musicas.forEach(m => {
-        lista.innerHTML += `
-          <li>
-            <div><b>ID:</b> ${m.id} | <b>${m.titulo}</b> (${m.duracao}s)</div>
-            <div style="margin-top: 5px;">
-              <button class="btn-acao" onclick="preencherCampos(${m.id}, '${m.titulo}', ${m.duracao})">Editar</button>
-              <button class="btn-acao" style="background-color: #e74c3c;" onclick="deletarMusica(${m.id})">Excluir</button>
-            </div>
-          </li>`;
-      });
-    }
-
-    async function buscarMusica() {
-      const titulo = document.getElementById('buscaTitulo').value;
-      const res = await fetch(`${API_URL}/busca?titulo=${titulo}`);
-      const musicas = await res.json();
-      const lista = document.getElementById('listaMusicas');
-      lista.innerHTML = '';
-      
-      if (musicas.length === 0) {
-        lista.innerHTML = '<li>Nenhuma música encontrada.</li>';
-        return;
-      }
-      
-      musicas.forEach(m => {
-        lista.innerHTML += `
-          <li>
-            <b>Encontrada no Índice:</b> ID: ${m.id} - ${m.titulo} (${m.duracao}s)
-            <br>
-            <button class="btn-acao" onclick="carregarMusicas()" style="margin-top:5px;">Voltar à Lista</button>
-          </li>`;
-      });
-    }
-
-    // CADASTRAR OU ATUALIZAR (CREATE / UPDATE)
-    async function salvarMusica() {
-      const id = document.getElementById('musicaId').value;
-      const titulo = document.getElementById('musicaTitulo').value;
-      const duracao = document.getElementById('musicaDuracao').value;
-
-      if (!titulo || !duracao) {
-        alert('Por favor, preencha o título e a duração!');
-        return;
-      }
-
-      const dados = { titulo, duracao };
-
-      if (id) {
-        await fetch(`${API_URL}/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dados)
-        });
-      } else {
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dados)
-        });
-      }
-
-      limparCampos();
-      carregarMusicas();
-    }
-
-    async function deletarMusica(id) {
-      if (confirm('Tem certeza que deseja excluir?')) {
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        carregarMusicas();
-      }
-    }
-
-    function preencherCampos(id, titulo, duracao) {
-      document.getElementById('musicaId').value = id;
-      document.getElementById('musicaTitulo').value = titulo;
-      document.getElementById('musicaDuracao').value = duracao;
-      window.scrollTo(0, 0);
-    }
-
-    function limparCampos() {
-      document.getElementById('musicaId').value = '';
-      document.getElementById('musicaTitulo').value = '';
-      document.getElementById('musicaDuracao').value = '';
-    }
-
-    carregarMusicas();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>

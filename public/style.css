@@ -1,0 +1,86 @@
+body { 
+  font-family: Arial, sans-serif; 
+  max-width: 600px; 
+  margin: 0 auto; 
+  padding: 15px; 
+  background-color: #f4f4f9; 
+  color: #333; 
+}
+
+input, button, select { 
+  width: 100%; 
+  padding: 10px; 
+  margin: 5px 0; 
+  box-sizing: border-box; 
+  border-radius: 4px; 
+}
+
+input, select { 
+  border: 1px solid #ccc; 
+  background: white; 
+}
+
+button { 
+  background-color: #1DB954; 
+  color: white; 
+  border: none; 
+  font-weight: bold; 
+  cursor: pointer; 
+}
+
+button:hover { 
+  background-color: #1ed760; 
+}
+
+.nav-tabs { 
+  display: grid; 
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 5px; 
+  margin-bottom: 15px; 
+}
+
+.nav-tabs button { 
+  background-color: #555; 
+  font-size: 11px; 
+  padding: 8px 2px; 
+}
+
+.nav-tabs button.active { 
+  background-color: #1DB954; 
+}
+
+.secao { 
+  display: none; 
+}
+
+.secao.active { 
+  display: block; 
+}
+
+hr { 
+  border: 0; 
+  border-top: 1px solid #ddd; 
+  margin: 15px 0; 
+}
+
+li { 
+  background: #fff; 
+  padding: 12px; 
+  margin-bottom: 8px; 
+  border: 1px solid #eee; 
+  border-radius: 4px; 
+  list-style: none; 
+}
+
+.btn-acao { 
+  width: auto; 
+  padding: 4px 8px; 
+  background-color: #e74c3c; 
+  font-size: 11px; 
+}
+
+.info-fk { 
+  font-size: 11px; 
+  color: #777; 
+  font-weight: bold; 
+}
