@@ -28,6 +28,8 @@ sudo -u postgres psql -d "Spotify" -f "/tmp/DDL-create-tables-Spotify.sql"
 
 sudo -u postgres psql -d "Spotify" -f "/tmp/DML-insert-Spotify.sql"
 
+# optimização de indice
+sudo -u postgres psql -d "Spotify" -c "CREATE INDEX IF NOT EXISTS idx_musica_nome ON Musica (nome_musica);"
 
 sudo -u postgres psql -c "
   DO \$\$
