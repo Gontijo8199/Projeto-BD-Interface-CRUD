@@ -1,0 +1,9 @@
+{
+  "name": "My Codespace",
+  "features": {
+    "ghcr.io/devcontainers/features/postgres:1": {
+      "version": "latest"
+    }
+  },
+  "forwardPorts": [5432]
+}
