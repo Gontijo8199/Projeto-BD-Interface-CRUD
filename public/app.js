@@ -196,6 +196,22 @@ async function carregarPlaylists() {
   });
 }
 
+async function buscarUsuario() {
+  const nome = document.getElementById('buscaUsuario').value;
+  if (!nome) { carregarUsuarios(); return; }
+  const res = await fetch(`/api/usuarios/busca?nome=${nome}`); 
+  const dados = await res.json();
+  const l = document.getElementById('listaUsuarios'); 
+  l.innerHTML = '';
+  
+  dados.forEach(u => {
+    l.innerHTML += `<li>
+      <b>[FILTRO]</b> ID ${u.id_usuario}: ${u.nome} (${u.tipo})
+      <button onclick="preencherFormulario('user', ${u.id_usuario}, '${u.nome}', '${u.email}', '${u.telefone}', '${u.tipo}')">Editar</button>
+      <button style="background-color:#e74c3c" onclick="deletar('usuarios', ${u.id_usuario}, carregarUsuarios)">Remover</button>
+    </li>`;
+  });
+}
 async function buscarAlbum() {
   const nome = document.getElementById('buscaAlbum').value;
   if (!nome) { carregarAlbuns(); return; }

@@ -9,20 +9,21 @@
 
 ## Otimização de Performance (Índice)
 
-
-
 ```sql
 CREATE INDEX idx_musica_nome ON Musica (nome_musica);
 
 ```
 
-<!-- TODO: Terminar -->
+A criação deste índice faz com que o PostgreSQL organize os nomes das músicas em uma estrutura de árvore balanceada ordenada. Na prática, isso transforma uma varredura sequencial lenta (que precisa ler linha por linha) em uma estratégia baseada nos princípios da Busca Binária. Em vez de percorrer todos os registros do disco, o leitor do banco consegue "cortar caminhos", descartando blocos massivos de dados que não contêm o termo procurado. Isso reduz drasticamente a complexidade temporal de $O(n)$ para $O(\log n)$, garantindo que o banco encontre qualquer faixa musical de forma quase instantânea, mesmo que o catálogo cresça para milhões de linhas.
+
+Como vemos isto na prática?
+
 ```sql
 EXPLAIN ANALYZE SELECT * FROM Musica WHERE nome_musica = 'Nome da Faixa';
 ```
 
 
-## Estrutura Relacional
+## Estrutura Relacionala
 
 | Tabela | Chave Primária (PK) | Chaves Estrangeiras (FK) | Operações |
 | --- | --- | --- | --- |

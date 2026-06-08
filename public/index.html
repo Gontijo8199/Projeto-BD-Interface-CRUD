@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <h1>Spotify BD - Painel de Controle</h1>
+  <h1>Spotify BD</h1>
   
   <div class="nav-tabs">
     <button id="tabUser" class="active" onclick="mudarAba('user')">1. Usuários</button>
@@ -17,7 +17,15 @@
     <button id="tabPlay" onclick="mudarAba('play')">4. Playlists</button>
   </div>
 
-  <div id="secUser" class="secao active">
+ <div id="secUser" class="secao active">
+    <h2>Buscar Usuário</h2>
+    <div style="display: flex; gap: 5px;">
+      <input type="text" id="buscaUsuario" placeholder="Nome do usuário...">
+      <button onclick="buscarUsuario()">Buscar</button>
+      <button onclick="carregarUsuarios()" style="background-color: #555;">Ver Todos</button>
+    </div>
+
+    <hr>
     <h2>Cadastrar / Editar Usuário</h2>
     <input type="number" id="userId" placeholder="ID do Usuário">
     <input type="text" id="userNome" placeholder="Nome">
