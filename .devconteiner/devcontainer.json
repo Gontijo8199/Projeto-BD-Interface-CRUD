@@ -5,5 +5,4 @@
       "version": "latest"
     }
   },
-  "forwardPorts": [5432]
 }
