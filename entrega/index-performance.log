@@ -1,0 +1,196 @@
+Busca sem índice: 
+
+
+                                                  QUERY PLAN                                                   
+---------------------------------------------------------------------------------------------------------------
+ Seq Scan on public.musica m  (cost=0.00..639.21 rows=1 width=53) (actual time=0.577..2.641 rows=1.00 loops=1)
+   Output: id_musica, nome_musica, faixa_audio_url, eh_explicita, registro_tom, duracao, id_album
+   Filter: ((m.nome_musica)::text = 'Faixa 18 - Album 0224'::text)
+   Rows Removed by Filter: 28016
+   Buffers: shared hit=289
+ Planning:
+   Buffers: shared hit=80
+ Planning Time: 0.333 ms
+ Execution Time: 2.837 ms
+(9 rows)
+
+                                                   QUERY PLAN                                                   
+----------------------------------------------------------------------------------------------------------------
+ Seq Scan on public.usuario u  (cost=0.00..131.00 rows=1 width=73) (actual time=0.401..0.433 rows=1.00 loops=1)
+   Output: id_usuario, nome, foto_perfil, telefone, email, tipo
+   Filter: ((u.nome)::text = 'ouvinte_04412'::text)
+   Rows Removed by Filter: 5039
+   Buffers: shared hit=68
+ Planning:
+   Buffers: shared hit=36
+ Planning Time: 0.248 ms
+ Execution Time: 0.443 ms
+(9 rows)
+
+                                                 QUERY PLAN                                                  
+-------------------------------------------------------------------------------------------------------------
+ Seq Scan on public.album a  (cost=0.00..31.57 rows=1 width=44) (actual time=0.111..0.112 rows=0.00 loops=1)
+   Output: id_album, nome_album, capa, tipo_album, data_lancamento
+   Filter: ((a.nome_album)::text = 'Coletânea Rock Vol. 13'::text)
+   Rows Removed by Filter: 1406
+   Buffers: shared hit=14
+ Planning:
+   Buffers: shared hit=33
+ Planning Time: 0.102 ms
+ Execution Time: 0.119 ms
+(9 rows)
+
+                                                                               QUERY PLAN                                                                               
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=1947.64..1947.69 rows=20 width=68) (actual time=11.650..11.658 rows=20.00 loops=1)
+   Output: u.id_usuario, u.nome, m.nome_musica, a.nome_album, m.duracao, om.id_registro
+   Buffers: shared hit=732
+   ->  Sort  (cost=1947.64..1947.69 rows=20 width=68) (actual time=11.648..11.654 rows=20.00 loops=1)
+         Output: u.id_usuario, u.nome, m.nome_musica, a.nome_album, m.duracao, om.id_registro
+         Sort Key: om.id_registro DESC
+         Sort Method: quicksort  Memory: 27kB
+         Buffers: shared hit=732
+         ->  Nested Loop  (cost=131.58..1947.21 rows=20 width=68) (actual time=0.354..11.596 rows=20.00 loops=1)
+               Output: u.id_usuario, u.nome, m.nome_musica, a.nome_album, m.duracao, om.id_registro
+               Inner Unique: true
+               Buffers: shared hit=729
+               ->  Nested Loop  (cost=131.30..1941.26 rows=20 width=50) (actual time=0.348..11.518 rows=20.00 loops=1)
+                     Output: u.id_usuario, u.nome, om.id_registro, m.nome_musica, m.duracao, m.id_album
+                     Inner Unique: true
+                     Buffers: shared hit=669
+                     ->  Hash Join  (cost=131.01..1934.86 rows=20 width=25) (actual time=0.337..11.278 rows=20.00 loops=1)
+                           Output: u.id_usuario, u.nome, om.id_registro, om.id_musica
+                           Inner Unique: true
+                           Hash Cond: (om.id_ouvinte = u.id_usuario)
+                           Buffers: shared hit=609
+                           ->  Seq Scan on public.ouvinte_escuta_musica om  (cost=0.00..1541.10 rows=100010 width=12) (actual time=0.007..5.064 rows=100010.00 loops=1)
+                                 Output: om.id_registro, om.id_ouvinte, om.id_musica
+                                 Buffers: shared hit=541
+                           ->  Hash  (cost=131.00..131.00 rows=1 width=17) (actual time=0.221..0.223 rows=1.00 loops=1)
+                                 Output: u.id_usuario, u.nome
+                                 Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                 Buffers: shared hit=68
+                                 ->  Seq Scan on public.usuario u  (cost=0.00..131.00 rows=1 width=17) (actual time=0.189..0.214 rows=1.00 loops=1)
+                                       Output: u.id_usuario, u.nome
+                                       Filter: ((u.nome)::text = 'ouvinte_04412'::text)
+                                       Rows Removed by Filter: 5039
+                                       Buffers: shared hit=68
+                     ->  Index Scan using pk_musica on public.musica m  (cost=0.29..0.32 rows=1 width=33) (actual time=0.009..0.009 rows=1.00 loops=20)
+                           Output: m.id_musica, m.nome_musica, m.faixa_audio_url, m.eh_explicita, m.registro_tom, m.duracao, m.id_album
+                           Index Cond: (m.id_musica = om.id_musica)
+                           Index Searches: 20
+                           Buffers: shared hit=60
+               ->  Index Scan using pk_album on public.album a  (cost=0.28..0.30 rows=1 width=26) (actual time=0.003..0.003 rows=1.00 loops=20)
+                     Output: a.id_album, a.nome_album, a.capa, a.tipo_album, a.data_lancamento
+                     Index Cond: (a.id_album = m.id_album)
+                     Index Searches: 20
+                     Buffers: shared hit=60
+ Planning:
+   Buffers: shared hit=84
+ Planning Time: 0.488 ms
+ Execution Time: 11.722 ms
+(47 rows)
+
+Busca com índice: 
+
+
+CREATE INDEX
+                                                             QUERY PLAN                                                              
+-------------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using nome_musica_idx on public.musica m  (cost=0.29..8.30 rows=1 width=53) (actual time=0.026..0.027 rows=1.00 loops=1)
+   Output: id_musica, nome_musica, faixa_audio_url, eh_explicita, registro_tom, duracao, id_album
+   Index Cond: ((m.nome_musica)::text = 'Faixa 18 - Album 0224'::text)
+   Index Searches: 1
+   Buffers: shared hit=1 read=2
+ Planning:
+   Buffers: shared hit=19 read=1
+ Planning Time: 0.472 ms
+ Execution Time: 0.048 ms
+(9 rows)
+
+DROP INDEX
+CREATE INDEX
+                                                            QUERY PLAN                                                             
+-----------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using nome_usr_idx on public.usuario u  (cost=0.28..8.30 rows=1 width=73) (actual time=0.017..0.017 rows=1.00 loops=1)
+   Output: id_usuario, nome, foto_perfil, telefone, email, tipo
+   Index Cond: ((u.nome)::text = 'ouvinte_04412'::text)
+   Index Searches: 1
+   Buffers: shared hit=1 read=2
+ Planning:
+   Buffers: shared hit=16 read=1
+ Planning Time: 0.203 ms
+ Execution Time: 0.029 ms
+(9 rows)
+
+DROP INDEX
+CREATE INDEX
+                                                            QUERY PLAN                                                             
+-----------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using nome_album_idx on public.album a  (cost=0.28..8.29 rows=1 width=44) (actual time=0.012..0.012 rows=0.00 loops=1)
+   Output: id_album, nome_album, capa, tipo_album, data_lancamento
+   Index Cond: ((a.nome_album)::text = 'Coletânea Rock Vol. 13'::text)
+   Index Searches: 1
+   Buffers: shared read=2
+ Planning:
+   Buffers: shared hit=16 read=1
+ Planning Time: 0.105 ms
+ Execution Time: 0.021 ms
+(9 rows)
+
+DROP INDEX
+CREATE INDEX
+CREATE INDEX
+                                                                              QUERY PLAN                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=94.44..94.49 rows=20 width=68) (actual time=0.221..0.225 rows=20.00 loops=1)
+   Output: u.id_usuario, u.nome, m.nome_musica, a.nome_album, m.duracao, om.id_registro
+   Buffers: shared hit=142 read=3
+   ->  Sort  (cost=94.44..94.49 rows=20 width=68) (actual time=0.220..0.222 rows=20.00 loops=1)
+         Output: u.id_usuario, u.nome, m.nome_musica, a.nome_album, m.duracao, om.id_registro
+         Sort Key: om.id_registro DESC
+         Sort Method: quicksort  Memory: 27kB
+         Buffers: shared hit=142 read=3
+         ->  Nested Loop  (cost=5.29..94.01 rows=20 width=68) (actual time=0.110..0.207 rows=20.00 loops=1)
+               Output: u.id_usuario, u.nome, m.nome_musica, a.nome_album, m.duracao, om.id_registro
+               Inner Unique: true
+               Buffers: shared hit=142 read=3
+               ->  Nested Loop  (cost=5.02..88.06 rows=20 width=50) (actual time=0.106..0.176 rows=20.00 loops=1)
+                     Output: u.id_usuario, u.nome, om.id_registro, m.nome_musica, m.duracao, m.id_album
+                     Inner Unique: true
+                     Buffers: shared hit=82 read=3
+                     ->  Nested Loop  (cost=4.73..81.66 rows=20 width=25) (actual time=0.101..0.123 rows=20.00 loops=1)
+                           Output: u.id_usuario, u.nome, om.id_registro, om.id_musica
+                           Buffers: shared hit=22 read=3
+                           ->  Index Scan using nome_usr_idx on public.usuario u  (cost=0.28..8.30 rows=1 width=17) (actual time=0.047..0.048 rows=1.00 loops=1)
+                                 Output: u.id_usuario, u.nome, u.foto_perfil, u.telefone, u.email, u.tipo
+                                 Index Cond: ((u.nome)::text = 'ouvinte_04412'::text)
+                                 Index Searches: 1
+                                 Buffers: shared hit=1 read=2
+                           ->  Bitmap Heap Scan on public.ouvinte_escuta_musica om  (cost=4.45..73.16 rows=20 width=12) (actual time=0.051..0.070 rows=20.00 loops=1)
+                                 Output: om.id_registro, om.id_ouvinte, om.id_musica
+                                 Recheck Cond: (u.id_usuario = om.id_ouvinte)
+                                 Heap Blocks: exact=20
+                                 Buffers: shared hit=21 read=1
+                                 ->  Bitmap Index Scan on om_id_ouv_idx  (cost=0.00..4.44 rows=20 width=0) (actual time=0.041..0.041 rows=20.00 loops=1)
+                                       Index Cond: (om.id_ouvinte = u.id_usuario)
+                                       Index Searches: 1
+                                       Buffers: shared hit=1 read=1
+                     ->  Index Scan using pk_musica on public.musica m  (cost=0.29..0.32 rows=1 width=33) (actual time=0.002..0.002 rows=1.00 loops=20)
+                           Output: m.id_musica, m.nome_musica, m.faixa_audio_url, m.eh_explicita, m.registro_tom, m.duracao, m.id_album
+                           Index Cond: (m.id_musica = om.id_musica)
+                           Index Searches: 20
+                           Buffers: shared hit=60
+               ->  Index Scan using pk_album on public.album a  (cost=0.28..0.30 rows=1 width=26) (actual time=0.001..0.001 rows=1.00 loops=20)
+                     Output: a.id_album, a.nome_album, a.capa, a.tipo_album, a.data_lancamento
+                     Index Cond: (a.id_album = m.id_album)
+                     Index Searches: 20
+                     Buffers: shared hit=60
+ Planning:
+   Buffers: shared hit=84 read=5
+ Planning Time: 0.638 ms
+ Execution Time: 0.297 ms
+(47 rows)
+
+DROP INDEX
+DROP INDEX
