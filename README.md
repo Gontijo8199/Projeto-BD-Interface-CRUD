@@ -10,6 +10,7 @@
 1. Abra o projeto diretamente no GitHub Codespaces (o ambiente e o banco de dados serão configurados de forma automática).
 2. Espere o sistema iniciar corretamente.
 3. Acesse o sistema através do link gerado na porta 3000 na aba Ports.
+   
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Gontijo8199/Projeto-BD-Interface-CRUD)
 
 ## Otimização de Performance (Índice)
